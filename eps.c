@@ -12,16 +12,25 @@
 #include "datasheet.h"
 #include "hw.h"
 
+#ifdef MONOLITHIC
+	// Monolithic source file... Combine all the source into one so that gcc can optimize across the HAL.
+#	include "hw_sim.c"
+#	warning "hw_sim configuration is selected... is that what you wanted?"
 
-/*
-// Enable debugging
-#define DEBUG( f )	f
-#define DEBUGPR( ... )  printf( "====eps: " __VA_ARGS__ )
-*/
+#else
+	/*
+	// Enable debugging
+#	define DEBUG( f )	f
+#	define DEBUGPR( ... )  printf( "====eps: " __VA_ARGS__ )
+	*/
 
-// Ignore debugging
-#define DEBUG( f )
-#define DEBUGPR( ... )
+	// Ignore debugging
+#	define DEBUG( f )
+#	define DEBUGPR( ... )
+
+#endif // MONOLITHIC
+
+
 
 #define STUB	// Placeholder for incomplete functionality
 
@@ -69,7 +78,7 @@ int GetNextFreeIdx( struct CRingBufferIndex *pIndex )
 // Returns the indexed stored data.
 float GetVar( enum EVar nVarIdx )
 {
-	if (nVarIdx >= VAR_MAX)
+	if (nVarIdx < 0  ||  nVarIdx >= VAR_MAX)
 	{
 		LogEvent( ERROR_BAD_VARIDX );
 		return 0.0f;

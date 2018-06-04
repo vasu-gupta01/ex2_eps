@@ -5,6 +5,8 @@
 	Michael Devine
 	AlbertaSat Project
 */
+#ifndef HW_H
+#define HW_H
 
 
 #include <inttypes.h>
@@ -65,3 +67,8 @@ void Idle( );
 
 // Returns voltage (in volts) of an onboard battery.
 float ReadBattV( );
+
+
+
+
+#endif //ndef HW_H
