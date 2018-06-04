@@ -24,12 +24,12 @@ struct CRingBufferIndex {
 // Allocates some memory for a ring buffer, initializing the given index and returning a pointer to the memory
 // Not ideal... void *AllocateRingBuffer( struct CRingBufferIndex *pIndex, int nElementSize );
 struct CEventLog {
-        TIME_t          nEventTime;
+        TIME_t          tEventTime;
         enum EEvent     nEventID;
         int             nData;
 };
 struct CSensorLog {
-        TIME_t          nTime;
+        TIME_t          tTime;
         float           fBattV;
         float           fBattTemp;
         float           fAmperage;

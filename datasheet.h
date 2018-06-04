@@ -27,7 +27,7 @@
 
 enum ECommand	// These are given by ground control and are from ground control's perspective.
 {
-	CMD_NULL = 0,
+	CMD_NOP = 0,	// No operation, ignore.
 
 	CMD_READ_VARIABLE = 1,
 	CMD_WRITE_VARIABLE = 2,
@@ -35,6 +35,7 @@ enum ECommand	// These are given by ground control and are from ground control's
 	CMD_REQUEST_LOGS,
 };
 
+// Variables and their default values
 enum EVar
 {
 	VAR_SENSORLOG_INTERVAL = 0,	// time in ms between routine logging
@@ -59,6 +60,10 @@ enum EEvent
 	EVENT_BOOT = 0,
 
 	EVENT_CLOCK_OVERFLOW,
+
+
+	// Error events
+	ERROR_BAD_VARIDX,
 };
 
 

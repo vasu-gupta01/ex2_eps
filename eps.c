@@ -26,12 +26,6 @@
 #define STUB	// Placeholder for incomplete functionality
 
 
-DEBUG( test );
-
-//#define IDLE	STUB
-//#define IDLE	STUB sleep( 1 );
-
-
 #define MODULE_COMMS	1
 #define MODULE_OBC	2
 #define MODULE_PAYLOAD	3
@@ -40,13 +34,17 @@ DEBUG( test );
 
 
 // Global data
-float ConfigVariables[VAR_MAX];
+float configVariables[VAR_MAX];
 
 struct {
-	TIME_t nFrameUptime;	// Uptime of the cpu, as recorded for the current frame of the main loop.
+	TIME_t tFrameUptime;	// Uptime of the cpu, as recorded for the current frame of the main loop.
 } cpu;
 
 
+
+
+
+void LogEvent( enum EEvent nEventID );
 
 
 
@@ -68,28 +66,19 @@ int GetNextFreeIdx( struct CRingBufferIndex *pIndex )
 }
 
 
+// Returns the indexed stored data.
 float GetVar( enum EVar nVarIdx )
 {
+	if (nVarIdx >= VAR_MAX)
+	{
+		LogEvent( ERROR_BAD_VARIDX );
+		return 0.0f;
+	}
+	return configVariables[nVarIdx];
 }
 
 // EPS functions ---------------------------------------------------------------------------
 
-
-//	Logs a test message
-#define MAX_MESSAGE_SIZE 256
-void Log( char *sMessage, ... )
-{
-	char sOut[MAX_MESSAGE_SIZE];	// Must use carefully to avoid overrun
-	va_list argptr;
-
-	va_start( argptr, sMessage );
-	vsprintf( sOut, sMessage, argptr );
-	va_end( argptr );
-
-	// Test functionality, just print it
-	STUB
-	printf( "%s\n", sOut );
-}
 
 //	Stores logging info on the occurrence of an event, for later retrieval.
 void LogEvent( enum EEvent nEventID )
@@ -97,7 +86,7 @@ void LogEvent( enum EEvent nEventID )
 	int nIdx = GetNextFreeIdx( &(g_logs.cEventLogsIndex) );
 	struct CEventLog *pLog = &(g_pEventLog[nIdx]);
 
-	pLog->nEventTime = GetUptime( );
+	pLog->tEventTime = GetUptime( );
 	pLog->nEventID = nEventID;
 	pLog->nData = 0;	STUB // Nothing needs data yet...
 }
@@ -110,15 +99,15 @@ void LogSensors( )
 //	Returns the length of time since the last time this was called, in units defined by TIME_t
 TIME_t GetFrameTime( )
 {
-	TIME_t nLastFrameUptime = cpu.nFrameUptime;
-	cpu.nFrameUptime = GetUptime( );
+	TIME_t tLastFrameUptime = cpu.tFrameUptime;
+	cpu.tFrameUptime = GetUptime( );
 
-	if (cpu.nFrameUptime < nLastFrameUptime)
+	if (cpu.tFrameUptime < tLastFrameUptime)
 	{
 		LogEvent( EVENT_CLOCK_OVERFLOW );	// Eg. if 32 bit times in milliseconds are used, times will overflow in 49.71 days.
 		// Subject to design specs, time overflows may be simply ignored and ground control can keep track of overflows and adjust accordingly.
 	}
-	return cpu.nFrameUptime - nLastFrameUptime;	// CPU should make this a sane value even in case of overflow.
+	return cpu.tFrameUptime - tLastFrameUptime;	// CPU should make this a sane value even in case of overflow.
 }
 
 
@@ -156,17 +145,13 @@ void UpdateBattery( )
 
 	DEBUGPR( "read %f volts\n", fVolts );
 
-	Log( "BatteryV: %f", fVolts );
+	// deprecated... Log( "BatteryV: %f", fVolts );
 }
 
 void HandleBoot( )
 {
 	// Mark beginning of uptime
 	GetFrameTime( );
-
-	// remove... trying to avoid allocating memory; prefer having it static and available right at the start
-	//logs.pEventLogs = AllocateRingBuffer( &(logs.cEventLogsIndex), sizeof( struct CEventLog ) );
-	//logs.pDataLogs = AllocateRingBuffer( &(logs.cSensorLogsIndex), sizeof( struct CSensorLog ) );
 
 	// Do absolute critical hardware initialization first
 	InitHW( );
@@ -189,7 +174,7 @@ void main( )
 	// Initial entry point when the power module (and typically entire satellite) is booted.
 	HandleBoot( );
 
-	TIME_t nTimeSinceLastLog = 0;
+	TIME_t tTimeSinceLastLog = 0;
 
 	// Idle loop
 	while( 1 ) {
@@ -200,14 +185,14 @@ void main( )
 		UpdateBattery( );
 
 
-		TIME_t nFrameTime = GetFrameTime( );
+		TIME_t tFrameTime = GetFrameTime( );
 
 		// Do intermittent housekeeping logging
-		nTimeSinceLastLog += nFrameTime;
-		if (nTimeSinceLastLog >= GetVar( VAR_SENSORLOG_INTERVAL ))
+		tTimeSinceLastLog += tFrameTime;
+		if (tTimeSinceLastLog >= GetVar( VAR_SENSORLOG_INTERVAL ))
 		{
-			// nTimeSinceLastLog -= GetVar( VAR_SENSORLOG_INTERVAL ); // Requires signed TIME_t! Do this for consistent average number of logs per time period.
-			nTimeSinceLastLog = 0;
+			// tTimeSinceLastLog -= GetVar( VAR_SENSORLOG_INTERVAL ); // Requires signed TIME_t! Do this for consistent average number of logs per time period.
+			tTimeSinceLastLog = 0;
 
 			LogSensors( );
 		}

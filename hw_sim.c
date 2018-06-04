@@ -14,11 +14,11 @@
 //#define DEBUG( f )              // Ignore debugging code f
 
 
-// #define RING_BUFFER_HEAP_SIZE 4096	// bytes
 
-#define DEFAULT_BATT_V	3.7f
+#define DEFAULT_BATT_V	3.7f	// Fake battery voltage
 
 
+// Allocate space for logs
 #define EVENTLOG_MAX	64
 #define SENSORLOG_MAX	256
 struct CEventLog g_pEventLog[EVENTLOG_MAX];
@@ -38,30 +38,6 @@ TIME_t GetUptime( )
 	s_nUptime += ((s_nUptime & 0x02) >> 1) + 1;
 	return s_nUptime;
 }
-
-/* Deprecated...
-// Allocates some memory for a ring buffer, initializing the given index and returning a pointer to the memory
-// Use a small fixed amount of space to simulate limited microcontroller memory.
-void *AllocateRingBuffer( struct CRingBufferIndex *pIndex, int nElementSize )
-{
-	static char pRingBufferData[RING_BUFFER_HEAP_SIZE];
-	static char *pFreeRingBufferData = pRingBufferData;
-
-	// Just as an example, allocate only up to half the remaining free data, meaning subsequent allocations are appox half the size of the last.
-	int nUsedSpace = pFreeRingBufferData - pRingBufferData;
-	int nAvailableSpace = (RING_BUFFER_HEAP_SIZE - nUsedSpace) >> 1;
-	int nAllocatedEntries = nAvailableSpace / nElementSize;
-
-	pIndex->nBufferSize = nAllocatedEntries;
-	pIndex->nNextFreeIdx = 0;
-	pIndex->nNextUnreadIdx = 0;
-
-	void *pRet = pFreeRingBufferData;
-	pFreeRingBufferData += nAllocatedEntries * nElementSize;
-	DEBUG( printf( "AllocateRingBuffer: Allocated %d bytes for %d elements.\n", nAllocatedEntries * nElementSize, nAllocatedEntries ) );
-	return pRet;
-}
-*/
 
 struct
 {
