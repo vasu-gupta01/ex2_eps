@@ -4,7 +4,7 @@ Ex-Alta 2 EPS module firmware EPS firmware Prototype
 
 Early prototyping ideas are in the branch 'experimental'
 
-===========================================================================================================================
+===============================================================================
 # AlbertaSat - Open CubeSat Platform #
 
 This repository contains (or will contain) source code and relevant content for the Open CubeSat Platform (OCP) - an open source platform for Cube Satellites developed at the University of Alberta
