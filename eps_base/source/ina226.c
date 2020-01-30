@@ -8,8 +8,8 @@
 
 
 #include "i2c.h"
-#include "em_i2c.h"
-#include "em_emu.h"
+//#include "em_i2c.h"
+//#include "em_emu.h"
 #include "ina226.h"
 
 /*******************************************************************************
@@ -40,33 +40,50 @@ int INA226_RegisterSet(I2C_TypeDef *i2c,
                          INA226_Register_TypeDef reg,
                          uint16_t val)
 {
-  I2C_TransferSeq_TypeDef seq;
+  //I2C_TransferSeq_TypeDef seq;
   uint8_t data[3];
-
-  seq.addr = addr;
-  seq.flags = I2C_FLAG_WRITE;
-
-  data[0] = ((uint8_t)reg);
-  data[1] = (uint8_t)(val >> 8);
-  data[2] = (uint8_t)val;
+  int error = 0;
   
-  seq.buf[0].data = data;
-  seq.buf[0].len = 3;
-
-  I2C_setStatus(i2c,I2C_TransferInit(i2c, &seq));
-
-  unsigned int retries = 0;
-
-  while (I2C_getStatus(i2c) == i2cTransferInProgress)
+  //Check if the busy is currently busy
+  if((i2c->STR & (uint32)I2C_BUSBUSY ) == 0)
   {
-    /* Enter EM1 while waiting for I2C interrupt */
-    if(MAX_RETRIES < retries++)break;
+      i2cSetDirection(i2c,I2C_TRANSMITTER);
+      i2cSetSlaveAdd(i2c,addr);
+      //seq.addr = addr;
+      //seq.flags = I2C_FLAG_WRITE;
 
-    EMU_EnterEM1();
-    /* Could do a timeout function here. */
+      data[0] = ((uint8_t)reg);
+      data[1] = (uint8_t)(val >> 8);
+      data[2] = (uint8_t)val;
+
+      //seq.buf[0].data = data;
+      //seq.buf[0].len = 3;
+
+      //I2C_setStatus(i2c,I2C_TransferInit(i2c, &seq));
+      i2cSetStart(i2c);
+
+      //unsigned int retries = 0;
+
+      i2cSend(i2c,3,data);
+      i2cSetStop(i2c);
+
+      //while (I2C_getStatus(i2c) == i2cTransferInProgress)
+      //while (i2c_IsBusBusy(i2c) == true)
+      //{
+        /* Enter EM1 while waiting for I2C interrupt */
+        //if(MAX_RETRIES < retries++)break;
+
+        //EMU_EnterEM1();
+        /* Could do a timeout function here. */
+      //}
   }
-  
-  return((int)I2C_getStatus(i2c));
+  else
+  {
+      //Busy is busy return a error
+      error = -1;
+  }
+  //return((int)I2C_getStatus(i2c));
+  return error;
 }
 
 /***************************************************************************//**
@@ -93,42 +110,66 @@ int INA226_RegisterGet(I2C_TypeDef *i2c,
                          INA226_Register_TypeDef reg,
                          uint16_t *val)
 {
-  I2C_TransferSeq_TypeDef seq;
+  //I2C_TransferSeq_TypeDef seq;
   uint8_t regid[1];
   uint8_t data[2];
-
-  seq.addr = addr;
-  seq.flags = I2C_FLAG_WRITE_READ;
-  /* Select register to be read */
-  regid[0] = ((uint8_t)reg) & 0xFF;
-  seq.buf[0].data = regid;
-  seq.buf[0].len = 1;
-  
-  seq.buf[1].data = data;
-  seq.buf[1].len = 2;
-
-  /* Do a polled transfer */
-  I2C_setStatus(i2c,I2C_TransferInit(i2c, &seq));
-  unsigned int retries = 0;
-
-  while (I2C_getStatus(i2c) == i2cTransferInProgress)
+  int error = 0;
+  if((i2c->STR & (uint32)I2C_BUSBUSY ) == 0)
   {
-    /* Enter EM1 while waiting for I2C interrupt */
-    if(MAX_RETRIES < retries++)break;
-    /* Enter EM1 while waiting for I2C interrupt */
-    EMU_EnterEM1();
-    /* Could do a timeout function here. */
+      //Set as transmitter to send the slave/register information
+      i2cSetDirection(i2c,I2C_TRANSMITTER);
+
+      //seq.addr = addr;
+      //seq.flags = I2C_FLAG_WRITE_READ;
+      /* Select register to be read */
+      regid[0] = ((uint8_t)reg) & 0xFF;
+      //seq.buf[0].data = regid;
+      //seq.buf[0].len = 1;
+      i2cSetSlaveAdd(i2c,addr);
+      //seq.buf[1].data = data;
+      //seq.buf[1].len = 2;
+      i2cSendByte(i2c, regid)
+      /* Do a polled transfer */
+      //I2C_setStatus(i2c,I2C_TransferInit(i2c, &seq));
+      //unsigned int retries = 0;
+      i2cSetStart(i2c);
+
+      //Let the Slave address and Register ID send before sending a stop byte
+      while(((i2c->STR &(uint32)I2C_NACK)==0) && ((i2c->STR &(uint32)I2C_ARDY_INT)==0));
+      i2cSetStop(i2c);
+
+      i2cSetDirection(i2c,I2C_RECEIVER);
+      i2cSetSlaveAdd(i2c,addr);
+
+      i2cSetStart(i2c);
+
+      i2cReceive(i2c,3,data);
+
+      i2cSetStop(i2c);
+      // while (I2C_getStatus(i2c) == i2cTransferInProgress)
+      //while (i2c_IsBusBusy(i2c) == true)
+      //{
+        /* Enter EM1 while waiting for I2C interrupt */
+        //if(MAX_RETRIES < retries++)break;
+        /* Enter EM1 while waiting for I2C interrupt */
+        //EMU_EnterEM1();
+        /* Could do a timeout function here. */
+      //}
+
+      //if (I2C_getStatus(i2c) != i2cTransferDone)
+      //{
+
+        //return((int)I2C_getStatus(i2c));
+      //}
+
+      *val = (((uint16_t)(data[0])) << 8) | data[1];
   }
-  
-  if (I2C_getStatus(i2c) != i2cTransferDone)
+  else
   {
-
-    return((int)I2C_getStatus(i2c));
+      error = -1
   }
-
-  *val = (((uint16_t)(data[0])) << 8) | data[1];
-
-  return((int)I2C_getStatus(i2c));
+ // return((int)I2C_getStatus(i2c));
+  return error;
 }
 
 int INA226_ReadShuntVoltage(I2C_TypeDef *i2c,
