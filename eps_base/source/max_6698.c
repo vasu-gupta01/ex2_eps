@@ -174,7 +174,8 @@ static const struct max6697_chip_data max6697_chip_data[] = {
 static struct max6697_data *max6697_update_device(struct device *dev)
 {
 	struct max6697_data *data = dev_get_drvdata(dev);
-	struct i2c_client *client = data->client;
+	//struct i2c_client *client = data->client;
+	i2cBASE_t *client = data->client;
 	struct max6697_data *ret = data;
 	int val;
 	int i;
@@ -182,15 +183,16 @@ static struct max6697_data *max6697_update_device(struct device *dev)
 
 	mutex_lock(&data->update_lock);
 
-	if (data->valid &&
+	/*if (data->valid &&
 	    !time_after(jiffies, data->last_updated
 			+ msecs_to_jiffies(data->update_interval)))
-		goto abort;
+		goto abort;*/
 
 	for (i = 0; i < data->chip->channels; i++) {
 		if (data->chip->have_ext & (1 << i)) {
-			val = i2c_smbus_read_byte_data(client,
-						       MAX6697_REG_TEMP_EXT[i]);
+			/*val = i2c_smbus_read_byte_data(client,
+						       MAX6697_REG_TEMP_EXT[i]);*/
+		    val = I2C
 			if (unlikely(val < 0)) {
 				ret = ERR_PTR(val);
 				goto abort;

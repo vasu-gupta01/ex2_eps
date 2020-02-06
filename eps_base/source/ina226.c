@@ -12,6 +12,8 @@
 //#include "em_emu.h"
 #include "ina226.h"
 
+//I2C_TypeDef replaced by i2cBASE_t
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -35,7 +37,7 @@
  * @return
  *   Returns 0 if register written, <0 if unable to write to register.
  ******************************************************************************/
-int INA226_RegisterSet(I2C_TypeDef *i2c,
+int INA226_RegisterSet(i2cBASE_t *i2c,
                          uint8_t addr,
                          INA226_Register_TypeDef reg,
                          uint16_t val)
@@ -105,7 +107,7 @@ int INA226_RegisterSet(I2C_TypeDef *i2c,
  * @return
  *   Returns 0 if register read, <0 if unable to read register.
  ******************************************************************************/
-int INA226_RegisterGet(I2C_TypeDef *i2c,
+int INA226_RegisterGet(i2cBASE_t *i2c,
                          uint8_t addr,
                          INA226_Register_TypeDef reg,
                          uint16_t *val)
@@ -172,7 +174,7 @@ int INA226_RegisterGet(I2C_TypeDef *i2c,
   return error;
 }
 
-int INA226_ReadShuntVoltage(I2C_TypeDef *i2c,
+int INA226_ReadShuntVoltage(i2cBASE_t *i2c,
                          uint8_t addr,
                          int *val)
 {
@@ -197,7 +199,7 @@ int INA226_ReadShuntVoltage(I2C_TypeDef *i2c,
 
 }
 
-int INA226_ReadBusVoltage(I2C_TypeDef *i2c,
+int INA226_ReadBusVoltage(i2cBASE_t *i2c,
                          uint8_t addr,
                          int *val)
 {
@@ -218,7 +220,7 @@ int INA226_ReadBusVoltage(I2C_TypeDef *i2c,
 
 }
 
-int INA226_ReadPower(I2C_TypeDef *i2c,
+int INA226_ReadPower(i2cBASE_t *i2c,
                          uint8_t addr,
                          int *val)
 {
@@ -239,7 +241,7 @@ int INA226_ReadPower(I2C_TypeDef *i2c,
 
 }
 
-int INA226_ReadCurr(I2C_TypeDef *i2c,
+int INA226_ReadCurr(i2cBASE_t *i2c,
                          uint8_t addr,
                          int *val)
 {
