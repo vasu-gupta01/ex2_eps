@@ -15,7 +15,8 @@ int step_up = 0;
 //SIMULATED VALUES
 float arr_curr[MAX_ARRAY_SIZE], arr_volt[MAX_ARRAY_SIZE];
 
-void readfromfile(const char* filename);
+
+void readfromfile(const char* filename); //Reads in simulated values from csv file.
 void po();
 
 int main() {
@@ -46,42 +47,36 @@ int main() {
 }
 
 void readfromfile(const char* filename) {
-    FILE *filePtr;
-
-    if((filePtr = fopen(filename, "r")) == NULL) {
-        printf("Could not open file!\n");
-
-        exit(1);
-    }
-    char buffer[MAX_ARRAY_SIZE+1];
-    float curr, volt;
+    FILE *fp = fopen(filename,"r");
+    char buff[255];
     int index = 0;
-    char curr_dest[MAX_ARRAY_SIZE+1];
-    char volt_sub[MAX_ARRAY_SIZE+1];
-    char volt_dest[MAX_ARRAY_SIZE+1];
+    
+    while(getc(fp) != EOF) {
+        fgets(buff, 255, fp);
+        char *token = strtok(buff, ",");
+        int count = 0;
 
+        while(token != NULL) {
+            switch(count){
+                case 0:
+                arr_curr[index] = atof(token);
+                break;
 
-    while(!feof(filePtr)) {
-        fgets(buffer, MAX_ARRAY_SIZE, filePtr);
+                case 1:
+                arr_volt[index] = atof(token);
+                break;
 
-        strncpy(curr_dest, buffer, 4);        
-        arr_curr[index] = atof(curr_dest);
-
-        int length = strlen(buffer) - 5;
-        if(length >= 0) {
-            strncpy(volt_sub, buffer+5, length);
+                default:
+                break;
+            }
             
-            volt_dest[length] = '\0';
-            strncpy(volt_dest, volt_dest, 4);
+            token = strtok(NULL, ",");
+            count += 1;
         }
-        strncpy(volt_dest, volt_sub, 4);
-        arr_volt[index] = atof(volt_dest);
-
         index += 1;
     }
 
-    fclose(filePtr);
-
+    fclose(fp);
 }
 
 void readCurrent() {
