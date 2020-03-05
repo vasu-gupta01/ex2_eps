@@ -69,7 +69,7 @@ struct max6697_chip_data {
 };
 
 struct max6697_data {
-	struct i2c_client *client;
+	struct i2cBASE_t  *client;
 
 	enum chips type;
 	const struct max6697_chip_data *chip;
@@ -192,50 +192,66 @@ static struct max6697_data *max6697_update_device(struct device *dev)
 		if (data->chip->have_ext & (1 << i)) {
 			/*val = i2c_smbus_read_byte_data(client,
 						       MAX6697_REG_TEMP_EXT[i]);*/
-		    val = I2C
-			if (unlikely(val < 0)) {
+		    i2cSendByte(client, MAX6697_REG_TEMP_EXT[i]);
+		    val = i2cReceiveByte(client);
+		    i2cSetStart(client);
+			/*if (unlikely(val < 0)) {
 				ret = ERR_PTR(val);
 				goto abort;
-			}
+			}*/
 			data->temp[i][MAX6697_TEMP_EXT] = val;
 		}
 
-		val = i2c_smbus_read_byte_data(client, MAX6697_REG_TEMP[i]);
-		if (unlikely(val < 0)) {
+		//val = i2c_smbus_read_byte_data(client, MAX6697_REG_TEMP[i]);
+		i2cSendByte(client, MAX6697_REG_TEMP[i]);
+		val = i2cReceiveByte(client);
+		i2cSetStart(client);
+		/*if (unlikely(val < 0)) {
 			ret = ERR_PTR(val);
-			goto abort;
+			goto abort;*/
 		}
 		data->temp[i][MAX6697_TEMP_INPUT] = val;
 
-		val = i2c_smbus_read_byte_data(client, MAX6697_REG_MAX[i]);
-		if (unlikely(val < 0)) {
+		//val = i2c_smbus_read_byte_data(client, MAX6697_REG_MAX[i]);
+		i2cSendByte(client, MAX6697_REG_MAX[i]);
+		val = i2cReceiveByte(client);
+		i2cSetStart(client);
+
+		/*if (unlikely(val < 0)) {
 			ret = ERR_PTR(val);
-			goto abort;
+			goto abort;*/
 		}
 		data->temp[i][MAX6697_TEMP_MAX] = val;
 
 		if (data->chip->have_crit & (1 << i)) {
-			val = i2c_smbus_read_byte_data(client,
-						       MAX6697_REG_CRIT[i]);
-			if (unlikely(val < 0)) {
+			//val = i2c_smbus_read_byte_data(client,
+			//			       MAX6697_REG_CRIT[i]);
+		    i2cSendByte(client, MAX6697_REG_CRIT[i]);
+		    val = i2cReceiveByte(client);
+		    i2cSetStart(client);
+			/*if (unlikely(val < 0)) {
 				ret = ERR_PTR(val);
 				goto abort;
-			}
+			}*/
 			data->temp[i][MAX6697_TEMP_CRIT] = val;
 		}
 	}
 
-	alarms = 0;
+	//alarms = 0;
 	for (i = 0; i < 3; i++) {
-		val = i2c_smbus_read_byte_data(client, MAX6697_REG_STAT(i));
-		if (unlikely(val < 0)) {
+		//val = i2c_smbus_read_byte_data(client, MAX6697_REG_STAT(i));
+	    i2cSendByte(client, MAX6697_REG_STAT[i]);
+	    val = i2cReceiveByte(client);
+	    i2cSetStart(client);
+
+		/*if (unlikely(val < 0)) {
 			ret = ERR_PTR(val);
 			goto abort;
-		}
-		alarms = (alarms << 8) | val;
+		}*/
+		//alarms = (alarms << 8) | val;
 	}
-	data->alarms = alarms;
-	data->last_updated = jiffies;
+	//data->alarms = alarms;
+	//data->last_updated = jiffies;
 	data->valid = true;
 abort:
 	mutex_unlock(&data->update_lock);
@@ -309,10 +325,14 @@ static ssize_t temp_store(struct device *dev,
 	temp = DIV_ROUND_CLOSEST(temp, 1000) + data->temp_offset;
 	temp = clamp_val(temp, 0, data->type == max6581 ? 255 : 127);
 	data->temp[nr][index] = temp;
-	ret = i2c_smbus_write_byte_data(data->client,
+	/*ret = i2c_smbus_write_byte_data(data->client,
 					index == 2 ? MAX6697_REG_MAX[nr]
 						   : MAX6697_REG_CRIT[nr],
-					temp);
+					temp);*/
+	i2cSendByte(data->client,index == 2 ? MAX6697_REG_MAX[nr] : MAX6697_REG_CRIT[nr]);
+	i2cSendByte(data->client,temp);
+	i2cStart(data->client);
+	i2cStop(data->client);
 	mutex_unlock(&data->update_lock);
 
 	return ret < 0 ? ret : count;
@@ -515,14 +535,20 @@ static int max6697_init_chip(struct max6697_data *data,
 	 * current chip configuration.
 	 */
 	if (!pdata && !client->dev.of_node) {
-		reg = i2c_smbus_read_byte_data(client, MAX6697_REG_CONFIG);
+		//reg = i2c_smbus_read_byte_data(client, MAX6697_REG_CONFIG);
+	    i2cSendByte(client, MAX6697_REG_CONFIG);
+	    val = i2cReceiveByte(client);
+	    i2cSetStart(client);
 		if (reg < 0)
 			return reg;
 		if (data->type == max6581) {
 			if (reg & MAX6581_CONF_EXTENDED)
 				data->temp_offset = 64;
-			reg = i2c_smbus_read_byte_data(client,
-						       MAX6581_REG_RESISTANCE);
+			/*reg = i2c_smbus_read_byte_data(client,
+						       MAX6581_REG_RESISTANCE);*/
+			i2cSendByte(client, MAX6697_REG_RESISTANCE);
+			val = i2cReceiveByte(client);
+			i2cSetStart(client);
 			if (reg < 0)
 				return reg;
 			factor += hweight8(reg);
@@ -559,7 +585,11 @@ static int max6697_init_chip(struct max6697_data *data,
 		reg |= MAX6693_CONF_BETA;
 	}
 
-	ret = i2c_smbus_write_byte_data(client, MAX6697_REG_CONFIG, reg);
+	//ret = i2c_smbus_write_byte_data(client, MAX6697_REG_CONFIG, reg);
+    i2cSendByte(data->client,reg);
+    i2cSendByte(data->client,MAX6697_REG_CONFIG);
+    i2cStart(data->client);
+    i2cStop(data->client);
 	if (ret < 0)
 		return ret;
 
