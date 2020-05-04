@@ -9,6 +9,7 @@
  */
 
 #include "dac8552.h"
+#include "gio.h"
 
 spiDAT1_t sConfDat;
 
@@ -56,7 +57,7 @@ void dacWrite(uint16 *dat, int chan) {
     };
 
     //Set SYNC low
-
+    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, LOW);
 
     //send control bits
     spiSendData(SPI_BASE_ADDR, &sConfDat, sizeof(control_bits), &control_bits);
@@ -67,6 +68,6 @@ void dacWrite(uint16 *dat, int chan) {
     spiTransmitData(SPI_BASE_ADDR, &sConfDat, sizeof(*dat), dat);
 
     //Set SYNC high
-
+    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, HIGH);
 }
 
