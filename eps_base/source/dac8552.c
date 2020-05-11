@@ -4,7 +4,11 @@
  *  Created on: Mar 17, 2020
  *      Author: vasug
  *
- *
+ *  Functions to implement:
+ *      dacInit           DONE
+ *      dacSetVal         DONE and tested.
+ *      dacSetPowerDown   TODO
+ *      dacGetPowerDown   TODO
  *
  */
 
@@ -13,32 +17,33 @@
 
 spiDAT1_t sConfDat;
 
-
 /*
- *  @brief : Initialize spi and dac8552 driver.
+ *  @brief : Initialize spi, gio (used for CS pin), and spiDAT1_t structure to be used for data transfer.
  *
  *
  */
 void dacInit(void) {
+    gioInit();
     spiInit();
 
-    sConfDat.CS_HOLD = false;
-    sConfDat.WDEL    = false;
+    gioSetDirection(SPI_PORT_ADDR, 0xFFFFFFFF);  //sets all gio pins to output.
+
+    sConfDat.CS_HOLD = TRUE;
+    sConfDat.WDEL    = TRUE;
     sConfDat.DFSEL   = SPI_FMT_0;
-    sConfDat.CSNR    = 0x00;
+    sConfDat.CSNR    = 0xFF;
 }
 
 
 /*
- * @brief          : Send data to dac.
+ * @brief          : Set DAC Vout value.
  *
- * @param[in] dat  : data bits to send to dac.
+ * @param[in] dat  : Data bits to send to dac.
  *
- * @param[in] chan : chan = 0 (DAC A) or chan = 1 (DAC B)
+ * @param[in] chan : chan = 0 (send to DAC A) or chan = 1 (send to DAC B).
  *
  */
-void dacWrite(uint16 *dat, int chan) {
-
+void dacSetVal(uint16 val, int chan) {
     uint8 control_bits;
 
     switch(chan) {
@@ -56,18 +61,19 @@ void dacWrite(uint16 *dat, int chan) {
             break;
     };
 
-    //Set SYNC low
-    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, LOW);
+    uint16 buffer[2];
+    uint16 temp_H, temp_L;
 
-    //send control bits
-    spiSendData(SPI_BASE_ADDR, &sConfDat, sizeof(control_bits), &control_bits);
-    spiTransmitData(SPI_BASE_ADDR, &sConfDat, sizeof(control_bits), &control_bits);
+    temp_H  = (val >> 8) & 0x00FF;          //set bits val[15...8] to temp_H[7...0]
+    temp_H |= (uint16)(control_bits << 8);  //set bits control_bits[7...0] to temp_H[15...8]
 
-    //send data bits
-    spiSendData(SPI_BASE_ADDR, &sConfDat, sizeof(*dat), dat);
-    spiTransmitData(SPI_BASE_ADDR, &sConfDat, sizeof(*dat), dat);
+    temp_L = (val << 8);  //set bits val[7...0] to temp_L[15...8]
 
-    //Set SYNC high
-    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, HIGH);
+    buffer[0] = temp_H;
+    buffer[1] = temp_L;
+
+    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, LOW);             //set DAC SYNC line low
+    spiTransmitData(SPI_BASE_ADDR, &sConfDat, 2, buffer);   //send control data and value to DAC
+    gioSetBit(SPI_PORT_ADDR, SPI_CS_ADDR, HIGH);            //set DAC SYNC line high
 }
 

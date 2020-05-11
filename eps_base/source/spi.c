@@ -91,20 +91,20 @@ void spiInit(void)
     spiREG3->INT0 = (spiREG3->INT0 & 0xFEFFFFFFU) | (uint32)((uint32)0U << 24U);  /* ENABLE HIGHZ */
 
     /** - Delays */
-    spiREG3->DELAY = (uint32)((uint32)0U << 24U)  /* C2TDELAY */
-                   | (uint32)((uint32)0U << 16U)  /* T2CDELAY */
-                   | (uint32)((uint32)0U << 8U)   /* T2EDELAY */
-                   | (uint32)((uint32)0U << 0U);  /* C2EDELAY */
+    spiREG3->DELAY = (uint32)((uint32)7U << 24U)  /* C2TDELAY */
+                   | (uint32)((uint32)5U << 16U)  /* T2CDELAY */
+                   | (uint32)((uint32)10U << 8U)   /* T2EDELAY */
+                   | (uint32)((uint32)10U << 0U);  /* C2EDELAY */
 
     /** - Data Format 0 */
-    spiREG3->FMT0 = (uint32)((uint32)0U << 24U)  /* wdelay */
+    spiREG3->FMT0 = (uint32)((uint32)10U << 24U)  /* wdelay */
                   | (uint32)((uint32)0U << 23U)  /* parity Polarity */
                   | (uint32)((uint32)0U << 22U)  /* parity enable */
                   | (uint32)((uint32)0U << 21U)  /* wait on enable */
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)79U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)3U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)16U << 0U);  /* data word length */
 
     /** - Data Format 1 */
@@ -229,7 +229,7 @@ void spiInit(void)
     /* SPI3 set all pins to functional */
     spiREG3->PC0  =   (uint32)((uint32)1U << 0U)  /* SCS[0] */
                     | (uint32)((uint32)1U << 1U)  /* SCS[1] */
-                    | (uint32)((uint32)1U << 2U)  /* SCS[2] */
+                    | (uint32)((uint32)0U << 2U)  /* SCS[2] */
                     | (uint32)((uint32)1U << 3U)  /* SCS[3] */
                     | (uint32)((uint32)1U << 4U)  /* SCS[4] */
                     | (uint32)((uint32)1U << 5U)  /* SCS[5] */

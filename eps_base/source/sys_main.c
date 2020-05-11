@@ -51,7 +51,7 @@
 
 /* USER CODE BEGIN (1) */
 #include <string.h>
-#include "spi.h"
+#include "dac8552.h"
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -69,30 +69,9 @@
 int main(void)
 {
 /* USER CODE BEGIN (3) */
-    spiInit();
+    dacInit();
 
-    spiDAT1_t confDat;
-
-    confDat.CS_HOLD = false;
-    confDat.WDEL    = false;
-    confDat.DFSEL   = SPI_FMT_0;
-    confDat.CSNR    = 0x00;
-
-    char dat[] = "Hello";
-
-    uint8  tx_ctrl = 0x10;
-    uint16 tx_dat = 0;
-
-    //spiEnableLoopback(spiREG1, Digital_Lbk);
-
-    //send 8 control bits
-    spiSendData(spiREG1, &confDat, 8, datC);
-
-
-    //send 16 data bits.
-    spiSendData(spiREG1, &confDat, 16, datA);
-
-    //spiGetData(spiREG1, &confDat, strlen(dat), (uint16*)dat);
+    dacSetVal(0x7FFF, 0);
 
     while(1);
 

@@ -17,15 +17,12 @@
 #define LOW                 0
 #define HIGH                1
 
-#define SPI_BASE_ADDR       spiREG3     //TODO: change to the appropriate spiREG.
-#define SPI_PORT_ADDR       spiPORT3    //TODO: change to the appropriate spiPORT.
-#define SPI_CS_ADDR         SPI3_CS0    //TODO: change to appropriate CS pin address.
-
-#define CONFIG_DAT_SIZE     8U
-#define DAT_SIZE            16U
+#define SPI_BASE_ADDR       spiREG3        //TODO: change to the appropriate spiREG.
+#define SPI_PORT_ADDR       spiPORT3       //TODO: change to the appropriate spiPORT.
+#define SPI_CS_ADDR         SPI_PIN_CS2    //TODO: change to appropriate CS pin address.
 
 
 void dacInit(void);
-void dacWrite(uint16 *dat, int chan);
+void dacSetVal(uint16 dat, int chan);
 
 #endif /* INCLUDE_DAC8552_H_ */

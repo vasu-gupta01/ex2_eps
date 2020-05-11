@@ -12,6 +12,10 @@ source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/incl
 source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/machine/_stdint.h
 source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/sys/_stdint.h
 source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/stdbool.h
+source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/string.h
+source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/_ti_config.h
+source/sys_main.obj: C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/linkage.h
+source/sys_main.obj: C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/dac8552.h
 source/sys_main.obj: C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/spi.h
 source/sys_main.obj: C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/reg_spi.h
 source/sys_main.obj: C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/reg_gio.h
@@ -28,6 +32,10 @@ C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/machine/_types.h:
 C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/machine/_stdint.h: 
 C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/sys/_stdint.h: 
 C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/stdbool.h: 
+C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/string.h: 
+C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/_ti_config.h: 
+C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include/linkage.h: 
+C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/dac8552.h: 
 C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/spi.h: 
 C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/reg_spi.h: 
 C:/Users/vasug/Desktop/ABSat/mppt_task/eps_base/include/reg_gio.h: 
